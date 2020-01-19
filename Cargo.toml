@@ -1,0 +1,17 @@
+[package]
+name = "rustyecho"
+version = "0.1.0"
+authors = ["Michael Berry <trismegustis@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "echo_client"
+path = "src/client.rs"
+
+[[bin]]
+name = "echo_server"
+path = "src/server.rs"
+
+[dependencies]
