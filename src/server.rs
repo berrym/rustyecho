@@ -1,20 +1,34 @@
 use std::{
+    env,
     io::{self, Read, Write},
     net::{TcpListener, TcpStream},
-    thread,
+    process, thread,
     time::Duration,
 };
 
-use rustyecho::get_address;
+use rustyecho::parse_args;
+
+use getargs::Options;
 
 fn main() -> io::Result<()> {
-    // Set server address
-    let address = get_address();
+    // Process cli arguments
+    let args: Vec<_> = env::args().skip(1).collect();
+    let opts = Options::new(&args);
+    let options = match parse_args(&opts) {
+        Ok(o) => o,
+        Err(e) => {
+            eprintln!("usage error: {}", e);
+            process::exit(1);
+        }
+    };
 
     // Bind to address
-    println!("Binding to {}", address);
-    let listener = TcpListener::bind(address.to_string())?;
-    println!("Successfully bound to {}, listening...", address);
+    println!("Binding to {}:{}", options.address, options.port);
+    let listener = TcpListener::bind(format!("{}:{}", options.address, options.port))?;
+    println!(
+        "Successfully bound to {}:{}, listening...",
+        options.address, options.port
+    );
 
     // Main loop
     for stream in listener.incoming() {

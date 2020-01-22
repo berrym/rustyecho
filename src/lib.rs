@@ -1,17 +1,27 @@
-pub fn get_address() -> String {
-    use std::env;
+use getargs::{Error, Opt, Options, Result};
 
-    let args: Vec<String> = env::args().collect();
-    let host: String;
-    let port: String;
+#[derive(Default, Debug)]
+pub struct CommandLineArguments<'a> {
+    pub address: &'a str,
+    pub port: &'a str,
+}
 
-    if args.len() != 3 {
-        host = String::from("127.0.0.1");
-        port = String::from("8888");
-    } else {
-        host = args[1].to_string();
-        port = args[2].to_string();
+pub fn parse_args<'a>(opts: &'a Options<'a, String>) -> Result<CommandLineArguments<'a>> {
+    let mut result = CommandLineArguments {
+        address: "127.0.0.1",
+        port: "8888",
+    };
+
+    while let Some(opt) = opts.next() {
+        match opt? {
+            // -e EXPRESSION, or -eEXPRESSION, or
+            // --execute EXPRESSION, or --execute=EXPRESSION
+            Opt::Short('a') | Opt::Long("address") => result.address = opts.value_str()?,
+            Opt::Short('p') | Opt::Long("port") => result.port = opts.value_str()?,
+            // An unknown option was passed
+            opt => return Err(Error::UnknownOpt(opt)),
+        }
     }
 
-    format!("{}:{}", host, port)
+    Ok(result)
 }

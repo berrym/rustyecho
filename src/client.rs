@@ -1,17 +1,29 @@
 use std::{
-    error,
+    env, error,
     io::{self, BufRead, BufReader, Write},
     net::{SocketAddr, TcpStream},
-    str,
+    process, str,
     time::Duration,
 };
 
-use rustyecho::get_address;
+use rustyecho::parse_args;
+
+use getargs::Options;
 
 fn main() -> Result<(), Box<dyn error::Error>> {
-    // Set remote server address
-    let address = get_address();
-    let remote: SocketAddr = address.parse()?;
+    // Process cli arguments
+    let args: Vec<_> = env::args().skip(1).collect();
+    let opts = Options::new(&args);
+    let options = match parse_args(&opts) {
+        Ok(o) => o,
+        Err(e) => {
+            eprintln!("usage error: {}", e);
+            process::exit(1);
+        }
+    };
+
+    // Set remote address
+    let remote: SocketAddr = format!("{}:{}", options.address, options.port).parse()?;
 
     // Connect to remote with a TCP stream
     println!("Connecting to {:?}", remote);

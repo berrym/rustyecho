@@ -38,6 +38,8 @@ Copyright 2020
 Michael Berry <trismegustis@gmail.com>
 
 ## Version History
+* 0.1.1
+    * Use getargs to process command line
 * 0.1.0
     * Initial Release
 
