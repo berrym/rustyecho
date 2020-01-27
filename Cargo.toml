@@ -1,6 +1,6 @@
 [package]
 name = "rustyecho"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Michael Berry <trismegustis@gmail.com>"]
 edition = "2018"
 
@@ -15,4 +15,4 @@ name = "echo_server"
 path = "src/server.rs"
 
 [dependencies]
-getargs = "0.4.1"
+clap = "2.33.0"

@@ -1,34 +1,31 @@
 use std::{
-    env,
     io::{self, Read, Write},
     net::{TcpListener, TcpStream},
-    process, thread,
+    thread,
     time::Duration,
 };
 
-use rustyecho::parse_args;
-
-use getargs::Options;
+#[macro_use]
+extern crate clap;
 
 fn main() -> io::Result<()> {
-    // Process cli arguments
-    let args: Vec<_> = env::args().skip(1).collect();
-    let opts = Options::new(&args);
-    let options = match parse_args(&opts) {
-        Ok(o) => o,
-        Err(e) => {
-            eprintln!("usage error: {}", e);
-            process::exit(1);
-        }
-    };
+    // Parse command line
+    let matches = clap_app!(rustyecho =>
+        (version: "0.1.1")
+        (author: "Michael Berry <trismegustis@gmail.com>")
+        (about: "Echo server")
+        (@arg ADDR: -a --addr +takes_value +required "Address to bind to")
+        (@arg PORT: -p --port +takes_value +required "Port number to bind to")
+    )
+    .get_matches();
+
+    let addr = matches.value_of("ADDR").unwrap();
+    let port = matches.value_of("PORT").unwrap();
 
     // Bind to address
-    println!("Binding to {}:{}", options.address, options.port);
-    let listener = TcpListener::bind(format!("{}:{}", options.address, options.port))?;
-    println!(
-        "Successfully bound to {}:{}, listening...",
-        options.address, options.port
-    );
+    println!("Binding to {}:{}", addr, port);
+    let listener = TcpListener::bind(format!("{}:{}", addr, port))?;
+    println!("Successfully bound to {}:{}, listening...", addr, port);
 
     // Main loop
     for stream in listener.incoming() {
@@ -41,6 +38,8 @@ fn main() -> io::Result<()> {
 fn handle_stream(mut stream: TcpStream) -> io::Result<()> {
     // Buffer to store remote input
     let mut buffer = [0; 512];
+
+    println!("New connection: {:?}", stream);
 
     loop {
         // Read bytes from the stream into buffer

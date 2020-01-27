@@ -1,29 +1,30 @@
 use std::{
-    env, error,
+    error,
     io::{self, BufRead, BufReader, Write},
     net::{SocketAddr, TcpStream},
-    process, str,
+    str,
     time::Duration,
 };
 
-use rustyecho::parse_args;
-
-use getargs::Options;
+#[macro_use]
+extern crate clap;
 
 fn main() -> Result<(), Box<dyn error::Error>> {
-    // Process cli arguments
-    let args: Vec<_> = env::args().skip(1).collect();
-    let opts = Options::new(&args);
-    let options = match parse_args(&opts) {
-        Ok(o) => o,
-        Err(e) => {
-            eprintln!("usage error: {}", e);
-            process::exit(1);
-        }
-    };
+    // Parse command line
+    let matches = clap_app!(rustyecho =>
+        (version: "0.1.1")
+        (author: "Michael Berry <trismegustis@gmail.com>")
+        (about: "Echo client")
+        (@arg ADDR: -a --addr +takes_value +required "Address of server")
+        (@arg PORT: -p --port +takes_value +required "Server port")
+    )
+    .get_matches();
+
+    let addr = matches.value_of("ADDR").unwrap();
+    let port = matches.value_of("PORT").unwrap();
 
     // Set remote address
-    let remote: SocketAddr = format!("{}:{}", options.address, options.port).parse()?;
+    let remote: SocketAddr = format!("{}:{}", addr, port).parse()?;
 
     // Connect to remote with a TCP stream
     println!("Connecting to {:?}", remote);
